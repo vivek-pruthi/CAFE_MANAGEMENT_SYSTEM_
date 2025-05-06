@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Cafe Management</title>
+    <style>
+        /* Basic reset and background */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f0f4f8, #e0e6eb);
+            color: #333;
+        }
+
+        .container {
+            width: 100%;
+            height: 100vh;
+            margin: 0;
+            padding: 90px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        html, body {
+    height: 100%; /* Ensure the body takes full height */
+}
+
+.container {
+    height: 100%; /* Ensure the container takes full height */
+    padding: 20px;
+    margin: 0;
+}
+
+.section {
+    height: calc(100% - 40px); /* Adjust height based on your header/footer */
+}
+
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 3em;
+            color: #007bff;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: #007bff;
+            color: #fff;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s;
+        }
+
+        .tab:hover {
+            background: #0056b3;
+            transform: scale(1.05);
+        }
+
+        .tab.active {
+            background: #0056b3;
+            transform: scale(1.1);
+        }
+
+        .section {
+            display: none;
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .section.active {
+            display: block;
+            opacity: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            transition: background 0.3s ease;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background-color: #218838;
+            transform: scale(1.05);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        textarea {
+            font-size: 14px;
+            height: 80px;
+            resize: vertical; /* Allow vertical resizing only */
+        }
+    </style>
+    
+     <!-- Favicon -->
+     <link rel="shortcut icon" href="images/cafe_fav.png" type="image/x-icon">
+
+</head>
+<body>
+    <div class="container">
+        <h1>Cafe Management</h1>
+        <div class="tabs">
+            <div class="tab active" onclick="showSection('orders')">Order Management</div>
+            <div class="tab" onclick="showSection('addOrder')">Add Order</div>
+            <div class="tab" onclick="showSection('inventory')">Inventory Management</div>
+            <div class="tab" onclick="showSection('table')">Table Reservation</div>
+            <div class="tab" onclick="showSection('feedback')">Customer Feedback</div>
+            <div class="tab" onclick="showSection('dashboard')">Overview Dashboard</div>
+            <div class="tab" onclick="showSection('loyalty')">Customer Loyalty</div>
+            <div class="tab" onclick="showSection('billGeneration')">Generate Invoice</div> 
+        </div>
+        
+        <!-- Order Management Section -->
+        <div id="orders" class="section active">
+            <h2>Order Management</h2>
+            <table>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Item</th>
+                    <th>Status</th>
+                    <th>Name</th>
+                    <th>Action</th>
+                </tr>
+                <tbody id="orderManagementTableBody">
+                   
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Add New Order Section -->
+        <div id="addOrder" class="section">
+            <h2>Add New Order</h2>
+            <form id="orderForm" onsubmit="addOrder(event)">
+                <input type="text" id="customerName" placeholder="Customer Name" required>
+                <input type="text" id="orderItem" placeholder="Item Name" required>
+                <input type="text" id="orderStatus" placeholder="Status (e.g., Preparing, Completed)" required>
+                <button type="submit">Add Order</button>
+            </form>
+        </div>
+
+        <!-- Inventory Management Section -->
+        <div id="inventory" class="section">
+            <h2>Inventory Management</h2>
+            <table>
+                <tr>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Action</th>
+                </tr>
+                <tbody id="inventoryTableBody">
+                    <tr>
+                        <td style="text-align: center;">Coffee Beans</td>
+                        <td style="text-align: center;">50 kg</td>
+                        <td style="text-align: center;"><button onclick="updateInventory(this)">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">Ice</td>
+                        <td style="text-align: center;">20 kg</td>
+                        <td style="text-align: center;"><button onclick="updateInventory(this)">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">Milk</td>
+                        <td style="text-align: center;">30 liters</td>
+                        <td style="text-align: center;"><button onclick="updateInventory(this)">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">Sugar</td>
+                        <td style="text-align: center;">20 kg</td>
+                        <td style="text-align: center;"><button onclick="updateInventory(this)">Update</button></td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: center;">Caramel Syrup</td>
+                        <td style="text-align: center;">10 Bottle</td>
+                        <td style="text-align: center;"><button onclick="updateInventory(this)">Update</button></td>
+                    </tr><tr>
+                        <td style="text-align: center;">Chocolate Syrup</td>
+                        <td style="text-align: center;">10 Bottle</td>
+                        <td style="text-align: center;"><button onclick="updateInventory(this)">Update</button></td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table Reservation Section -->
+        <div id="table" class="section">
+            <h2>Table Reservation</h2>
+            <form id="reservationForm" onsubmit="reserveTable(event)">
+                <input type="text" id="customerNameReservation" placeholder="Customer Name" required>
+                <input type="date" id="reservationDate" required>
+                <input type="time" id="reservationTime" required>
+                <button type="submit">Reserve Table</button>
+            </form>
+            <h3>Current Reservations</h3>
+            <table>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Action</th>
+                </tr>
+                <tbody id="reservationTableBody">
+                    <tr>
+                        <td style="text-align: center;">John Doe</td>
+                        <td style="text-align: center;">2023-10-01</td>
+                        <td style="text-align: center;">18:00</td>
+                        <td style="text-align: center;"><button onclick="cancelReservation(this)">Cancel</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Customer Feedback Section -->
+<div id="feedback" class="section" style="background-color: #f9f9f9; padding: 20px; border-radius: 10px;">
+    <h2>Customer Feedback</h2>
+    <form id="feedbackForm" onsubmit="submitFeedback(event)">
+        <input type="text" id="feedbackName" placeholder="Your Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; margin-bottom: 10px;">
+        <textarea id="feedbackMessage" placeholder="Your Feedback" required style="padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 100%; margin-bottom: 10px;"></textarea>
+        <button type="submit" style="padding: 10px 20px; background-color: #1eb158; color: #fff; border: none; border-radius: 5px; cursor: pointer; transition: background 0.3s;">Submit Feedback</button>
+    </form>
+    <h3>Feedback List</h3>
+    <ul id="feedbackList" style="list-style-type: none; padding: 0;">
+        <li style="background: #fff; border-radius: 5px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">Great service!</li>
+        <li style="background: #fff; border-radius: 5px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);">Delicious coffee!</li>
+    </ul>
+</div>
+
+         <!-- Overview Dashboard Section -->
+     <div id="dashboard" class="section">
+            <h2>Overview Dashboard</h2>
+            <canvas id="salesChart" style="width: 100%; height: 30px;"></canvas>
+            <button onclick="updateChartData()">Update Sales Data</button>
+     </div>
+
+          <!-- Customer Loyalty Section -->
+          <div id="loyalty" class="section">
+            <h2>Customer Loyalty Program</h2>
+            <form id="loyaltyForm" onsubmit="addLoyaltyPoints(event)">
+                <input type="text" id="customerNameLoyalty" placeholder="Customer Name" required>
+                <input type="number" id="orderAmount" placeholder="Order Amount" required>
+                <button type="submit">Add Points</button>
+            </form>
+            <h3>Loyalty Points</h3>
+            <table>
+                <tr>
+                    <th>Customer Name</th>
+                    <th>Total Points</th>
+                </tr>
+                <tbody id="loyaltyTableBody"></tbody>
+            </table>
+        </div>
+        
+
+        <!-- Invoice Generator Section -->
+        <div id="billGeneration" class="section">
+        <h2>Invoice Generator</h2>
+        <form id="invoiceForm" onsubmit="generateInvoice(event)">
+            <input type="text" id="invoiceCustomerName" placeholder="Customer Name" required>
+            <input type="text" id="invoiceItem" placeholder="Item Name" required>
+            <input type="number" id="invoiceQuantity" placeholder="Quantity" required>
+            <input type="number" id="invoicePrice" placeholder="Price per Item" required>
+            <button type="submit">Generate Invoice</button>
+            <button onclick="printInvoice()">Print</button>
+        </form>
+        <div id="invoiceOutput">
+            <h3>Invoice</h3>
+            <p id="invoiceDetails"></p>
+        </div>
+    </div>
+
+
+</div>
+
+    <script>
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [
+                { id: 1, item: 'Espresso', status: 'Preparing', name: 'Tanish'},
+                { id: 2, item: 'Cappuccino', status: 'Completed', name: 'John'}
+            ];
+            
+            const orderTableBody = document.getElementById('orderManagementTableBody');
+        
+            // Clear existing rows
+            orderTableBody.innerHTML = '';
+        
+            orders.forEach(order => {
+                const newRow = orderTableBody.insertRow();
+                newRow.innerHTML = `
+                   <td style="text-align: center;">${order.id}</td>
+            <td style="text-align: left;">${order.item}</td>
+            <td style="text-align: center;">${order.status}</td>
+            <td style="text-align: left;">${order.name}</td>
+            <td style="text-align: center;"><button onclick="confirmUpdateStatus(this)">Mark as Ready</button></td>
+        `;
+            });
+        }
+        
+        // Call loadOrders when the page loads
+        document.addEventListener('DOMContentLoaded', loadOrders);
+
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            const tabs = document.querySelectorAll('.tab');
+
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(sectionId).classList.add('active');
+            const activeTab = Array.from(tabs).find(tab => tab.getAttribute('onclick').includes(sectionId));
+            if (activeTab) {
+                activeTab.classList.add('active');
+            }
+        }
+
+        function confirmUpdateStatus(button) {
+            const row = button.closest('tr');
+            const statusCell = row.cells[2];
+            
+            if (statusCell.textContent === 'Preparing') {
+                statusCell.textContent = 'Completed';
+                button.textContent = 'Reorder';
+            } else {
+                statusCell.textContent = 'Preparing';
+                button.textContent = 'Mark as Ready';
+            }
+        }
+
+        function addOrder(event) {
+    event.preventDefault();
+
+    const customerName = document.getElementById('customerName').value;
+    const item = document.getElementById('orderItem').value;
+    const status = document.getElementById('orderStatus').value;
+
+    const orderTableBody = document.getElementById('orderManagementTableBody');
+    const newRow = orderTableBody.insertRow();
+
+    const orderId = orderTableBody.rows.length;
+    const actionText = status === 'Preparing' ? 'Mark as Ready' : 'Reorder';
+
+    newRow.innerHTML = `
+        <td style="text-align: center;">${orderId}</td>
+        <td style="text-align: centre;">${item}</td>
+        <td style="text-align: center;">${status}</td>
+        <td style="text-align: centre;">${customerName}</td>
+        <td style="text-align: center;"><button onclick="confirmUpdateStatus(this)">${actionText}</button></td>
+    `;
+
+    document.getElementById('orderForm').reset();
+}
+
+        function updateInventory(button) {
+            const row = button.closest('tr');
+            const quantityCell = row.cells[1];
+            const newQuantity = prompt('Enter new quantity:', quantityCell.textContent);
+
+            if (newQuantity !== null) {
+                quantityCell.textContent = newQuantity;
+            }
+        }
+
+        function reserveTable(event) {
+    event.preventDefault();
+
+    const name = document.getElementById('customerNameReservation').value;
+    const date = document.getElementById('reservationDate').value;
+    const time = document.getElementById('reservationTime').value;
+
+    const reservationTableBody = document.getElementById('reservationTableBody');
+    const newRow = reservationTableBody.insertRow();
+
+    newRow.innerHTML = `
+        <td style="text-align: center;">${name}</td>
+        <td style="text-align: center;">${date}</td>
+        <td style="text-align: center;">${time}</td>
+        <td style="text-align: center;"><button onclick="cancelReservation(this)">Cancel</button></td>
+    `;
+
+    document.getElementById('reservationForm').reset();
+}
+
+        function cancelReservation(button) {
+            const row = button.closest('tr');
+            row.remove();
+        }
+
+        function submitFeedback(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('feedbackName').value;
+            const message = document.getElementById('feedbackMessage').value;
+
+            const feedbackList = document.getElementById('feedbackList');
+            const newFeedback = document.createElement('li');
+
+            // Apply styles to the new feedback item
+    newFeedback.style.background = '#fff';
+    newFeedback.style.borderRadius = '5px';
+    newFeedback.style.padding = '15px';
+    newFeedback.style.marginBottom = '10px';
+    newFeedback.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+    
+            newFeedback.textContent = `${name}: ${message}`;
+
+            feedbackList.appendChild(newFeedback);
+            document.getElementById('feedbackForm').reset();
+        }
+
+         // Sales Chart
+         let salesChart;
+
+function createSalesChart(dataLabels, dataValues) {
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    salesChart = new Chart(ctx, {
+        type: 'bar', // You can change this to 'bar', 'pie', etc.
+        data: {
+            labels: dataLabels,
+            datasets: [{
+                label: 'Sales Data',
+                data: dataValues,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 2,
+                fill: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+function updateChartData() {
+    // Example data, you can customize this to get real sales data
+    const labels = ['January', 'February', 'March', 'April', 'May', 'June'];
+    const salesData = [120, 150, 180, 130, 170, 200]; // Example sales data
+
+    if (salesChart) {
+        salesChart.destroy(); // Destroy existing chart instance
+    }
+    createSalesChart(labels, salesData); // Create a new chart with updated data
+}
+
+// Call this function to create the chart when the page loads
+updateChartData();
+
+
+
+          // Customer Loyalty System: Manage Points
+          const customerPoints = {};
+
+        function addLoyaltyPoints(event) {
+    event.preventDefault();
+    const customerName = document.getElementById('customerNameLoyalty').value;
+    const orderAmount = parseFloat(document.getElementById('orderAmount').value);
+
+    // Calculate points based on the order amount (e.g., 1 point per $10)
+    const pointsEarned = Math.floor(orderAmount / 10);
+
+    if (customerPoints[customerName]) {
+        customerPoints[customerName] += pointsEarned;
+    } else {
+        customerPoints[customerName] = pointsEarned;
+    }
+
+    updateLoyaltyTable();
+    document.getElementById('loyaltyForm').reset();
+}
+
+        function updateLoyaltyTable() {
+        const loyaltyTableBody = document.getElementById('loyaltyTableBody');
+         loyaltyTableBody.innerHTML = '';
+
+        for (const customer in customerPoints) {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${customer}</td>
+            <td>${customerPoints[customer]}</td>
+        `;
+        loyaltyTableBody.appendChild(row);
+    }
+}
+
+function generateInvoice(event) {
+            event.preventDefault();
+
+            const customerName = document.getElementById('invoiceCustomerName').value;
+            const item = document.getElementById('invoiceItem').value;
+            const quantity = parseInt(document.getElementById('invoiceQuantity').value);
+            const price = parseFloat(document.getElementById('invoicePrice').value);
+            const total = quantity * price;
+
+            const invoiceDetails = `
+                <strong>Customer Name:</strong> ${customerName}<br>
+                <strong>Item:</strong> ${item}<br>
+                <strong>Quantity:</strong> ${quantity}<br>
+                <strong>Price per Item:</strong> ₹${price.toFixed(2)}<br>
+                <strong>Total:</strong> ₹${total.toFixed(2)}
+            `;
+
+            document.getElementById('invoiceDetails').innerHTML = invoiceDetails;
+            document.getElementById('invoiceOutput').style.display = 'block';
+            document.getElementById('invoiceForm').reset();
+        }
+
+        function printInvoice() {
+        const invoiceOutput = document.getElementById('invoiceOutput');
+        const printWindow = window.open('', '', 'width=800,height=600');
+        printWindow.document.write(invoiceOutput.outerHTML);
+        printWindow.document.close();
+        printWindow.print();
+    }
+
+
+
+
+
+    </script>
+</body>
+</html>
